@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Wiraga - Sporty Modern Engine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- PWA Config -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#141428">
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">    
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Library SheetJS untuk membaca file Excel/CSV -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <!-- Library untuk Export Excel + Gambar Grafik -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <div class="appHeader">
+        <img src="logo_baru.png" id="appLogo" alt="Logo Wiraga">
+        <div id="hamburger" onclick="toggleMobileSidebar()">&#9776;</div>
+    </div>
+    
+    <!-- Sidebar Navigasi -->
+    <div id="sidebar">
+        <div class="sidebar-title">MENU</div>
+
+        <a onclick="showPage('beranda')" id="linkBeranda" class="activeSidebar">
+            <div class="nav-left">
+                <i class="fas fa-th-large nav-icon"></i>
+                <span>Beranda</span>
+            </div>
+        </a>
+
+        <a onclick="showPage('tambahRumus')" id="linkTambah">
+            <div class="nav-left">
+                <i class="fas fa-plus-circle nav-icon"></i>
+                <span>Tambah Rumus</span>
+            </div>
+        </a>
+
+        <a onclick="toggleSubmenu('hitungSub')" id="linkHitung">
+            <div class="nav-left">
+                <i class="fas fa-calculator nav-icon"></i>
+                <span>Hitung</span>
+            </div>
+            <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+        </a>
+
+        <div id="hitungSub" class="submenu"></div>
+
+        <a onclick="showPage('riwayat')" id="linkRiwayat">
+            <div class="nav-left">
+                <i class="fas fa-history nav-icon"></i>
+                <span>Riwayat</span>
+            </div>
+        </a>
+
+        <a onclick="showPage('tentang')" id="linkTentang">
+            <div class="nav-left">
+                <i class="fas fa-info-circle nav-icon"></i>
+                <span>Tentang</span>
+            </div>
+        </a>
+    </div>
+
+    <!-- 1. PAGE: BERANDA -->
+    <div id="beranda" class="page active">
+        <!-- Hero Banner -->
+        <div class="hero-banner">
+            <div class="hero-text">
+                <span class="badge-tag"><i class="fas fa-bolt"></i> WIRAGA ENGINE v2.0</span>
+                <h1>Selamat Datang di Wiraga</h1>
+                <p>Platform Asesmen & Analisis Kebugaran Jasmani Universal. Bebas tambah formula tes fisik sesuai kebutuhan pengujianmu.</p>
+                <div class="hero-buttons">
+                    <button class="btn-primary" onclick="showPage('tambahRumus')">
+                        <i class="fas fa-plus-circle"></i> Tambah Rumus
+                    </button>
+                    <button class="btn-secondary" onclick="showPage('riwayat')">
+                        <i class="fas fa-history"></i> Lihat Riwayat
+                    </button>
+                </div>
+            </div>
+            <div class="hero-icon">
+                <i class="fas fa-running"></i>
+            </div>
+        </div>
+
+        <!-- Quick Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon red"><i class="fas fa-calculator"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value" id="statTotalRumus">0</span>
+                    <span class="stat-label">Rumus Tersedia</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon blue"><i class="fas fa-clipboard-check"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value" id="statTotalRiwayat">0</span>
+                    <span class="stat-label">Sesi Tes Tersimpan</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon green"><i class="fas fa-users"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value" id="statTotalSiswa">0</span>
+                    <span class="stat-label">Siswa/Atlet Teruji</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch;">
+            <!-- KOLOM KIRI: Agenda -->
+            <div class="dashboard-card" id="cardAgenda" style="display: flex; flex-direction: column; height: 100%;">
+                <div class="card-header-flex">
+                    <h3><i class="fas fa-calendar-alt" style="color: #48dbfb;"></i> Agenda & Schedule</h3>
+                    <button type="button" class="btn-action-header" id="btnToggleForm" onclick="toggleFormAgenda()">
+                        <i class="fas fa-plus"></i> Jadwal
+                    </button>
+                </div>
+
+                <div id="formAgendaInline" class="agenda-form-inline" style="display: none; margin-bottom: 15px;">
+                    <div class="form-header-inline" style="margin-bottom: 10px;">
+                        <small style="color: #48dbfb;"><i class="fas fa-calendar-plus"></i> Tambah Agenda Baru</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Nama Sesi / Jenis Tes</label>
+                        <input type="text" id="inputNamaTes" placeholder="Contoh: Tes Cooper 12 Menit">
+                    </div>
+                    <div class="form-group">
+                        <label>Kelas / Tim</label>
+                        <input type="text" id="inputKelasTes" placeholder="Contoh: Kelas 4A / Tim Futsal">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tanggal</label>
+                            <input type="date" id="inputTanggalTes">
+                        </div>
+                        <div class="form-group">
+                            <label>Jumlah Siswa</label>
+                            <input type="number" id="inputJumlahSiswa" placeholder="28">
+                        </div>
+                    </div>
+                    <div class="form-actions-inline">
+                        <button type="button" class="btn-cancel" onclick="toggleFormAgenda()">Batal</button>
+                        <button type="button" class="btn-save-modal" onclick="simpanJadwalBaru()">Simpan Agenda</button>
+                    </div>
+                </div>
+
+                <div class="agenda-list" id="agendaContainer" style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                    <div class="empty-agenda" style="text-align: center; width: 100%;">
+                        <i class="fas fa-calendar-minus"></i>
+                        <p>Belum ada agenda tes mendatang.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KOLOM KANAN: Coach Notes -->
+            <div class="dashboard-card" style="display: flex; flex-direction: column; height: 100%;">
+                <div class="card-header-flex">
+                    <h3><i class="fas fa-sticky-note" style="color: #feca57;"></i> Catatan Pelatih / Guru</h3>
+                    <button type="button" class="btn-action-header yellow" onclick="simpanCatatan()">Simpan</button>
+                </div>
+                <div class="notes-container" style="flex: 1; display: flex; flex-direction: column; margin-top: 10px;">
+                    <textarea id="coachNotes" placeholder="Tulis pengingat lapangan di sini (misal: 'Persiapkan stopwatch & cone untuk tes lari esok hari')..." style="flex: 1; min-height: 200px; resize: vertical;"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. PAGE: TAMBAH RUMUS -->
+    <div id="tambahRumus" class="page">
+        <div class="page-header-box">
+            <div class="header-icon-badge">
+                <i class="fas fa-calculator"></i>
+            </div>
+            <div>
+                <h2>Buat Rumus & Formula Baru</h2>
+                <p>Rancang kalkulasi tes fisik. Kata/huruf dalam rumus akan otomatis terdeteksi sebagai variabel input.</p>
+            </div>
+        </div>
+
+        <div class="tambah-rumus-grid">
+            <div class="tambah-card">
+                <div class="field-item">
+                    <label for="namaRumus"><i class="fas fa-tag"></i> Nama Rumus / Tes</label>
+                    <input type="text" id="namaRumus" placeholder="Contoh: Tes VO2Max Rockport">
+                </div>
+
+                <div class="field-item">
+                    <label for="isiRumus"><i class="fas fa-square-root-variable"></i> Formula Rumus Matematika</label>
+                    <input type="text" id="isiRumus" placeholder="Contoh: ((Jarak / 15) - 133) * 0.172 + 33.33" oninput="parseRumusSmart()">
+                    <small class="field-hint"><i class="fas fa-info-circle"></i> Gunakan simbol <code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>(</code> <code>)</code> dan ketik nama variabel langsung.</small>
+                </div>
+
+                <div class="field-item">
+                    <label for="deskripsiRumus"><i class="fas fa-align-left"></i> Keterangan / Prosedur Tes</label>
+                    <textarea id="deskripsiRumus" rows="4" placeholder="Tuliskan petunjuk singkat pelaksanaan tes..."></textarea>
+                </div>
+
+                <button class="btn-primary btn-save-full" onclick="simpanRumusSmart()">
+                    <i class="fas fa-check-circle"></i> Simpan & Publikasikan Rumus
+                </button>
+            </div>
+
+            <div class="tambah-card preview-side">
+                <div class="side-header">
+                    <i class="fas fa-cubes" style="color: #48dbfb;"></i>
+                    <span>PRATINJAU DOKUMEN & STRUKTUR</span>
+                </div>
+
+                <div id="smartPreviewContainer" class="preview-content-box" style="display: none;">
+                    <div class="preview-section-title">Elemen Terdeteksi:</div>
+                    <div id="blockChipsWrapper" class="chips-container-full"></div>
+                    <div id="parenValidationStatus" class="validation-badge-box"></div>
+                    <div class="verbal-box-full">
+                        <small>Penjelasan Logika:</small>
+                        <div id="verbalText">...</div>
+                    </div>
+                </div>
+
+                <div id="emptyPreviewPlaceholder" class="empty-preview-state">
+                    <i class="fas fa-keyboard"></i>
+                    <p>Ketik rumus pada kolom di sebelah kiri untuk melihat visualisasi blok dan validasi matematika secara live.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. PAGE: HITUNG -->
+    <div id="hitung" class="page card" style="padding-top: 80px; padding-bottom: 40px;">
+        <div class="page-header-box" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="header-icon-badge">
+                    <i class="fas fa-calculator"></i>
+                </div>
+                <div>
+                    <h2 id="judulRumus">Pilih Rumus di Sidebar</h2>
+                    <div id="previewRumus" class="field-hint" style="margin-top: 4px;">Silakan pilih salah satu tes dari menu sidebar untuk memulai perhitungan.</div>
+                </div>
+            </div>
+
+            <div id="btnGroupRumusHeader" style="display: none; gap: 8px;">
+                <button class="btn-secondary" onclick="bukaModalEditRumus()" style="background: rgba(254, 202, 87, 0.15); color: #feca57; border: 1px solid rgba(254, 202, 87, 0.3); padding: 8px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">
+                    <i class="fas fa-edit"></i> Edit Formula Tes
+                </button>
+            </div>
+        </div>
+
+        <div class="tambah-rumus-grid">
+            <div class="tambah-card">
+                <div class="hitung-metadata-box" style="background: rgba(30, 41, 59, 0.5); padding: 15px; border-radius: 10px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                    <div>
+                        <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">Kelas / Rombel</label>
+                        <input type="text" id="inputKelasTesHitung" placeholder="Contoh: Kelas 4A" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 13px;" />
+                    </div>
+                    
+                    <div>
+                        <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">Tanggal Tes</label>
+                        <input type="date" id="inputTanggalTesHitung" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 13px;" />
+                    </div>
+
+                    <div>
+                        <label style="color: #38bdf8; font-size: 12px; display: block; margin-bottom: 4px; font-weight: 600;">Benchmark / Target</label>
+                        <input type="number" step="0.01" id="inputBenchmarkHitung" placeholder="Contoh: 60" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #38bdf8; border-radius: 6px; color: #fff; font-size: 13px;" />
+                    </div>
+
+                    <div style="grid-column: span 3; background: rgba(15, 23, 42, 0.6); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-top: 2px;">
+                        <label style="color: #cbd5e1; font-size: 12px; display: block; margin-bottom: 8px; font-weight: 600;">
+                            ⚖️ Kriteria Kinerja (Tipe Tes)
+                        </label>
+                        <div style="display: flex; gap: 20px; align-items: center;">
+                            <label style="display: flex; align-items: center; gap: 8px; color: #fff; font-size: 13px; cursor: pointer;">
+                                <input type="radio" name="orientasiTes" id="higherIsBetter" value="higher" checked style="accent-color: #2ed573;">
+                                <span>📈 <b>Higher is Better</b></span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; color: #fff; font-size: 13px; cursor: pointer;">
+                                <input type="radio" name="orientasiTes" id="lowerIsBetter" value="lower" style="accent-color: #ff4757;">
+                                <span>⏱️ <b>Lower is Better</b></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div style="grid-column: span 3; background: rgba(15, 23, 42, 0.6); padding: 12px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-top: 2px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <label style="color: #cbd5e1; font-size: 12px; font-weight: 600; margin: 0;">
+                                📊 Rubrik Kategori Nilai Mentah (Result)
+                            </label>
+                            <small style="color: #94a3b8; font-size: 11px;">Masukkan angka batas minimal/maksimal skor</small>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                            <div>
+                                <span style="color: #2ed573; font-size: 11px; font-weight: bold; display: block;">Sangat Baik</span>
+                                <input type="number" step="any" id="rubrikSangatBaik" placeholder="Contoh: 90" style="width: 100%; padding: 6px 8px; background: #0f172a; border: 1px solid #334155; border-radius: 4px; color: #fff; font-size: 12px;" />
+                            </div>
+                            <div>
+                                <span style="color: #38bdf8; font-size: 11px; font-weight: bold; display: block;">Baik</span>
+                                <input type="number" step="any" id="rubrikBaik" placeholder="Contoh: 75" style="width: 100%; padding: 6px 8px; background: #0f172a; border: 1px solid #334155; border-radius: 4px; color: #fff; font-size: 12px;" />
+                            </div>
+                            <div>
+                                <span style="color: #feca57; font-size: 11px; font-weight: bold; display: block;">Cukup</span>
+                                <input type="number" step="any" id="rubrikCukup" placeholder="Contoh: 60" style="width: 100%; padding: 6px 8px; background: #0f172a; border: 1px solid #334155; border-radius: 4px; color: #fff; font-size: 12px;" />
+                            </div>
+                            <div>
+                                <span style="color: #ff4757; font-size: 11px; font-weight: bold; display: block;">Kurang</span>
+                                <input type="text" value="Sisa Rentang" disabled style="width: 100%; padding: 6px 8px; background: #1e293b; border: 1px solid #334155; border-radius: 4px; color: #94a3b8; font-size: 12px; cursor: not-allowed;" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="grid-column: span 3;">
+                        <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">Catatan Sesi (Opsional)</label>
+                        <input type="text" id="inputCatatanHitung" placeholder="Contoh: Penilaian Tengah Semester / Post-test" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 13px;" />
+                    </div>
+                </div>
+
+                <div class="side-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;"> 
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-edit" style="color: #ff6b6b;"></i>
+                        <span>INPUT PARAMETER & DATA</span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="position: relative;">
+                            <i class="fas fa-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 11px;"></i>
+                            <input type="text" id="searchAtletInput" placeholder="Cari nama atlet..." onkeyup="filterTabelAtlet()" style="padding: 5px 10px 5px 28px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 12px; width: 160px; outline: none;" />
+                        </div>
+
+                        <div>
+                            <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: none;" onchange="prosesImportExcel(event)" />
+                            <button type="button" onclick="document.getElementById('excelFileInput').click()" style="background: rgba(46, 213, 115, 0.15); color: #2ed573; border: 1px solid rgba(46, 213, 115, 0.3); padding: 5px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: bold;">
+                                <i class="fas fa-file-excel"></i> Import Excel / CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tabContents" class="form-body" style="max-height: 420px; overflow-y: auto; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px;"></div>
+                <div class="primaryAction" style="margin-top: 15px;"></div>
+            </div>
+
+            <div class="tambah-card preview-side">
+                <div class="side-header">
+                    <i class="fas fa-chart-line" style="color: #2ed573;"></i>
+                    <span>HASIL PERHITUNGAN</span>
+                </div>
+
+                <div id="hasilCard" class="calc-result-box-container"></div>
+
+                <div class="secondaryAction" style="margin-top: auto; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; gap: 10px;">
+                    <button class="btn-secondary" id="hapusRumusBtn" onclick="hapusRumus()" style="display:none; background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); flex: 1; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                        🗑️ Hapus Rumus
+                    </button>
+                    <button class="btn-primary" onclick="simpanRiwayat()" style="flex: 1; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                        💾 Simpan Riwayat
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. PAGE: RIWAYAT -->
+    <div id="riwayat" class="page card" style="padding-top: 80px; padding-bottom: 40px;">
+        <div class="page-header-box" style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div class="header-icon-badge">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div>
+                    <h2 style="margin: 0;">Riwayat Tes Fisik</h2>
+                    <div class="field-hint" style="margin-top: 4px;">Rekapitulasi data hasil pengujian fisik atlet/siswa.</div>
+                </div>
+            </div>
+
+            <div>
+                <button class="btn-secondary" onclick="hapusSemuaRiwayat()" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+                    <i class="fas fa-trash-alt"></i> Hapus Semua
+                </button>
+
+                <!-- TOMBOL EKSPOR EXCEL -->
+                <button class="btn-secondary" onclick="bukaModalExportExcel()" style="background: rgba(16, 124, 65, 0.2); color: #4ade80; border: 1px solid rgba(16, 124, 65, 0.4); padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+                    <i class="fa-solid fa-file-excel"></i> Ekspor Excel
+                    </button>
+            </div>
+        </div>
+
+        <div class="riwayat-nav-tabs" style="margin-top: 20px; margin-bottom: 20px;">
+            <button class="btn-tab-riwayat active" data-tab="sesi" onclick="switchTabRiwayat('sesi')">
+                <i class="fas fa-list-alt"></i> Per Sesi Tes
+            </button>
+            <button class="btn-tab-riwayat" data-tab="kelas" onclick="switchTabRiwayat('kelas')">
+                <i class="fas fa-users"></i> Per Kelas
+            </button>
+            <button class="btn-tab-riwayat" data-tab="siswa" onclick="switchTabRiwayat('siswa')">
+                <i class="fas fa-user-graduate"></i> Per Siswa
+            </button>
+        </div>
+
+        <div id="riwayatList" class="riwayat-content"></div>
+    </div>
+
+    <!-- HALAMAN TENTANG WIRAGA ENGINE -->
+<div id="tentang" class="page">
+    <div class="tentang-container">
+        
+        <!-- HERO BANNER TENTANG -->
+        <div class="tentang-hero">
+            <span class="badge-tag">
+                <i class="fas fa-microchip"></i> Physical Education & Sport Science Engine
+            </span>
+            <h1>WIRAGA ENGINE <span class="version-badge">v2.0 Pro</span></h1>
+            <p class="hero-description">
+                Platform digital terintegrasi untuk pengujian, kalkulasi, analisis data performa fisik, serta manajemen asesmen kebugaran jasmani secara presisi dan terstruktur.
+            </p>
+
+            <div class="hero-stats-row">
+                <div class="hero-stat-item">
+                    <span class="stat-number">100%</span>
+                    <span class="stat-text">Dynamic Formula Smart Parser</span>
+                </div>
+                <div class="hero-stat-item">
+                    <span class="stat-number">Real-Time</span>
+                    <span class="stat-text">Readiness & Gap Analysis</span>
+                </div>
+                <div class="hero-stat-item">
+                    <span class="stat-number">Multi-Mode</span>
+                    <span class="stat-text">Excel & Data Export Ready</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- FITUR-FITUR UNGGULAN (GRID 6 CARDS) -->
+        <div class="about-section-header">
+            <h3><i class="fas fa-cubes"></i> Fitur Utama & Ekosistem Sistem</h3>
+            <p>Fitur profesional yang dirancang khusus untuk guru PJOK, pelatih fisik, dan praktisi keolahragaan.</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon red"><i class="fas fa-calculator"></i></div>
+                <h4>Smart Formula Builder</h4>
+                <p>Fitur pembuatan rumus kustom mandiri. Dilengkapi dengan <i>syntax parser</i> cerdas yang secara otomatis mendeteksi variabel, operator, dan validasi tanda kurung.</p>
+            </div>
+
+            <div class="feature-card blue">
+                <div class="feature-icon blue"><i class="fas fa-chart-line"></i></div>
+                <h4>Readiness & Gap Analysis</h4>
+                <p>Mengukur tingkat kesiapan fisik siswa/atlet terhadap target <i>benchmark</i>. Otomatis menghitung persentase capaian dan batas toleransi (Gap %).</p>
+            </div>
+
+            <div class="feature-card green">
+                <div class="feature-icon green"><i class="fas fa-file-excel"></i></div>
+                <h4>Import & Export Excel Data</h4>
+                <p>Kemudahan impor data masal dari file Excel (`.xlsx`), serta fitur ekspor laporan pengujian lengkap siap cetak atau analisis tingkat lanjut.</p>
+            </div>
+
+            <div class="feature-card yellow">
+                <div class="feature-icon yellow"><i class="fas fa-history"></i></div>
+                <h4>Multi-Level Riwayat & Analytics</h4>
+                <p>Manajemen riwayat pengujian fisik dinamis dengan 3 mode analisis: berbasis <b>Sesi Tes</b>, <b>Rekapitulasi Kelas</b>, dan <b>Progres Siswa</b>.</p>
+            </div>
+
+            <div class="feature-card purple">
+                <div class="feature-icon purple"><i class="fas fa-chart-pie"></i></div>
+                <h4>Dynamic Chart Visualizer</h4>
+                <p>Visualisasi grafik interaktif menggunakan <i>Chart.js</i> untuk perbandingan *benchmark vs result*, serta tren perkembangan kebugaran harian maupun bulanan.</p>
+            </div>
+
+            <div class="feature-card teal">
+                <div class="feature-icon teal"><i class="fas fa-shield-alt"></i></div>
+                <h4>Local Storage Auto-Sync</h4>
+                <p>Sistem penyimpanan data lokal secara instan. Data tes, formula rumus, agenda, dan catatan tersimpan aman di browser tanpa takut kehilangan data.</p>
+            </div>
+        </div>
+
+        <!-- CARA KERJA SISTEM (WORKFLOW) -->
+        <div class="workflow-card">
+            <h3><i class="fas fa-project-diagram"></i> Alur Kerja Aplikasi Wiraga Engine</h3>
+            <div class="workflow-steps">
+                <div class="step-item">
+                    <div class="step-num">1</div>
+                    <h5>Pilih / Buat Rumus</h5>
+                    <p>Gunakan rumus standar (seperti VO2Max Balke) atau buat rumus kustom melalui Smart Formula Builder.</p>
+                </div>
+                <div class="step-arrow"><i class="fas fa-chevron-right"></i></div>
+                <div class="step-item">
+                    <div class="step-num">2</div>
+                    <h5>Input / Impor Data</h5>
+                    <p>Masukkan data atlet/siswa secara manual atau impor dari spreadsheet Excel sekaligus.</p>
+                </div>
+                <div class="step-arrow"><i class="fas fa-chevron-right"></i></div>
+                <div class="step-item">
+                    <div class="step-num">3</div>
+                    <h5>Kalkulasi & Evaluasi</h5>
+                    <p>Sistem menghitung nilai otomatis, menetapkan kategori rubrik, dan membandingkannya dengan target benchmark.</p>
+                </div>
+                <div class="step-arrow"><i class="fas fa-chevron-right"></i></div>
+                <div class="step-item">
+                    <div class="step-num">4</div>
+                    <h5>Simpan & Analisis</h5>
+                    <p>Simpan sesi ke riwayat untuk melihat grafik progres perkembangan kelas atau siswa individual.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TEKNOLOGI & LISENSI METADATA -->
+        <div class="tech-stack-row">
+            <div class="tech-card">
+                <h5><i class="fas fa-code"></i> Arsitektur Teknologi</h5>
+                <div class="tech-tags">
+                    <span class="tech-tag">HTML5 / CSS3</span>
+                    <span class="tech-tag">Vanilla JS ES6</span>
+                    <span class="tech-tag">Chart.js</span>
+                    <span class="tech-tag">SheetJS (XLSX)</span>
+                    <span class="tech-tag">FontAwesome 6</span>
+                    <span class="tech-tag">LocalStorage DB</span>
+                </div>
+            </div>
+
+            <div class="tech-card">
+                <h5><i class="fas fa-info-circle"></i> Informasi Aplikasi</h5>
+                <ul class="info-list">
+                    <li><b>Pengembang:</b> Ariesta Vandera</li>
+                    <li><b>Domain Utama:</b> Physical Education, Sport Science, Coaching, Physical Test, and Fitness Test</li>
+                    <li><b>Aksesibilitas:</b> Responsive Layout (Desktop, Tablet, Mobile)</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+    <!-- MODAL-MODAL DITAROH DI LUAR AREA .PAGE -->
+    
+    <!-- MODAL EDIT RUMUS -->
+    <div id="modalEditRumusAktif" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(4px);">
+        <div style="background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; width: 90%; max-width: 650px; max-height: 90vh; overflow-y: auto; padding: 24px; color: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+                <h3 style="margin: 0; font-size: 18px; color: #feca57; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-edit"></i> Edit Rumus & Formula Tes
+                </h3>
+                <button onclick="tutupModalEditRumus()" style="background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer;">&times;</button>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div class="field-item">
+                    <label for="editRumusNama" style="color: #cbd5e1; font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">
+                        <i class="fas fa-tag" style="color: #ff6b6b;"></i> Nama Rumus / Tes
+                    </label>
+                    <input type="text" id="editRumusNama" placeholder="Contoh: Tes VO2Max Rockport" style="width: 100%; padding: 10px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 13px; box-sizing: border-box;" />
+                </div>
+
+                <div class="field-item">
+                    <label for="editRumusFormula" style="color: #cbd5e1; font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">
+                        <i class="fas fa-square-root-variable" style="color: #38bdf8;"></i> Formula Rumus Matematika
+                    </label>
+                    <input type="text" id="editRumusFormula" placeholder="Contoh: ((Jarak / 15) - 133) * 0.172 + 33.33" oninput="parseRumusSmartEdit()" style="width: 100%; padding: 10px 12px; background: #0f172a; border: 1px solid #38bdf8; border-radius: 8px; color: #fff; font-size: 13px; box-sizing: border-box;" />
+                    <small class="field-hint" style="color: #94a3b8; font-size: 11px; display: block; margin-top: 4px;">
+                        <i class="fas fa-info-circle"></i> Gunakan simbol <code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>(</code> <code>)</code> dan ketik nama variabel langsung.
+                    </small>
+                </div>
+
+                <div id="editSmartPreviewContainer" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px; font-size: 12px;">
+                    <div style="color: #94a3b8; margin-bottom: 6px; font-size: 11px;">Elemen Terdeteksi:</div>
+                    <div id="editBlockChipsWrapper" class="chips-container-full" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;"></div>
+                    <div id="editParenValidationStatus" class="validation-badge-box"></div>
+                    <div style="margin-top: 8px; font-size: 11px; color: #cbd5e1;">
+                        <small style="color: #94a3b8;">Penjelasan Logika:</small>
+                        <div id="editVerbalText" style="margin-top: 2px;">...</div>
+                    </div>
+                </div>
+
+                <div class="field-item">
+                    <label for="editRumusDeskripsi" style="color: #cbd5e1; font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">
+                        <i class="fas fa-align-left" style="color: #feca57;"></i> Keterangan / Prosedur Tes
+                    </label>
+                    <textarea id="editRumusDeskripsi" rows="3" placeholder="Tuliskan petunjuk singkat pelaksanaan tes..." style="width: 100%; padding: 10px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 13px; resize: vertical; box-sizing: border-box;"></textarea>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 15px;">
+                <button type="button" onclick="tutupModalEditRumus()" style="background: #334155; color: #cbd5e1; border: none; padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                    Batal
+                </button>
+                <button type="button" onclick="simpanPerubahanRumusAktif()" style="background: #2ed573; color: #0f172a; border: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer;">
+                    <i class="fas fa-check-circle"></i> Simpan Perubahan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDIT SISWA -->
+    <div id="modalEditSiswa" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(4px);">
+        <div style="background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; width: 90%; max-width: 420px; padding: 20px; color: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px;">
+                <h3 style="margin: 0; font-size: 16px; color: #38bdf8;">
+                    <i class="fas fa-user-edit"></i> Edit Data Hasil Siswa
+                </h3>
+                <button onclick="tutupModalEditSiswa()" style="background: none; border: none; color: #94a3b8; font-size: 18px; cursor: pointer;">&times;</button>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div>
+                    <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">Nama Siswa / Atlet:</label>
+                    <input type="text" id="editNamaSiswa" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 13px; box-sizing: border-box;">
+                </div>
+
+                <div>
+                    <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">Hasil / Nilai Capaian:</label>
+                    <input type="number" step="any" id="editNilaiSiswa" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 13px; box-sizing: border-box;">
+                </div>
+
+                <div>
+                    <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">Benchmark Target:</label>
+                    <input type="number" step="any" id="editBenchmarkSiswa" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 13px; box-sizing: border-box;">
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 15px;">
+                <button type="button" onclick="tutupModalEditSiswa()" style="background: #334155; color: #cbd5e1; border: none; padding: 8px 14px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                    Batal
+                </button>
+                <button type="button" onclick="simpanPerubahanSiswa()" style="background: #38bdf8; color: #0f172a; font-weight: bold; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                    <i class="fas fa-save"></i> Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDIT SESI TES -->
+    <div id="modalEditSesi" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(4px);">
+        <div style="background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; width: 90%; max-width: 500px; padding: 20px; color: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px;">
+                <h3 style="margin: 0; font-size: 16px; color: #feca57;">
+                    <i class="fas fa-sliders-h"></i> Edit Parameter Sesi Tes
+                </h3>
+                <button onclick="tutupModalEditSesi()" style="background: none; border: none; color: #94a3b8; font-size: 18px; cursor: pointer;">&times;</button>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">Nama Tes / Instrumen:</label>
+                        <input type="text" id="editSesiNamaTes" style="width: 100%; padding: 8px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 12px; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">Kelas:</label>
+                        <input type="text" id="editSesiKelas" style="width: 100%; padding: 8px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 12px; box-sizing: border-box;">
+                    </div>
+                </div>
+
+                <div>
+                    <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">Benchmark Sesi (Target):</label>
+                    <input type="number" step="any" id="editSesiBenchmark" style="width: 100%; padding: 8px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 12px; box-sizing: border-box;">
+                </div>
+
+                <div>
+                    <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">Orientasi Hasil Tes:</label>
+                    <div style="display: flex; gap: 15px; background: #0f172a; padding: 8px; border-radius: 6px; border: 1px solid #334155;">
+                        <label style="font-size: 12px; color: #2ed573; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="editOrientasiTes" value="higher"> Higher is Better (Repetisi/Jarak)
+                        </label>
+                        <label style="font-size: 12px; color: #ff4757; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="editOrientasiTes" value="lower"> Lower is Better (Waktu/Detik)
+                        </label>
+                    </div>
+                </div>
+
+                <div style="background: rgba(15, 23, 42, 0.6); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                    <label style="font-size: 11px; color: #38bdf8; font-weight: bold; display: block; margin-bottom: 8px;">Batas Minimal Skala / Rubrik Nilai:</label>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                        <div>
+                            <small style="color: #2ed573; font-size: 10px;">Sangat Baik (SB):</small>
+                            <input type="number" step="any" id="editRubrikSB" placeholder="Batas SB" style="width: 100%; padding: 6px; background: #0f172a; border: 1px solid #334155; border-radius: 4px; color: #fff; font-size: 11px; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <small style="color: #38bdf8; font-size: 10px;">Baik (B):</small>
+                            <input type="number" step="any" id="editRubrikB" placeholder="Batas B" style="width: 100%; padding: 6px; background: #0f172a; border: 1px solid #334155; border-radius: 4px; color: #fff; font-size: 11px; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <small style="color: #feca57; font-size: 10px;">Cukup (C):</small>
+                            <input type="number" step="any" id="editRubrikC" placeholder="Batas C" style="width: 100%; padding: 6px; background: #0f172a; border: 1px solid #334155; border-radius: 4px; color: #fff; font-size: 11px; box-sizing: border-box;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
+                <button type="button" onclick="tutupModalEditSesi()" style="background: #334155; color: #cbd5e1; border: none; padding: 8px 14px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                    Batal
+                </button>
+                <button type="button" onclick="simpanPerubahanSesi()" style="background: #feca57; color: #0f172a; font-weight: bold; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                    <i class="fas fa-sync-alt"></i> Hitung Ulang & Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <!-- FOOTER NAVBAR -->
+    <footer>
+        <div class="footer-container">
+            <a href="https://wa.me/6285179635310" target="_blank">
+                <i class="fab fa-whatsapp"></i> +62 851-7963-5310
+            </a>
+            <span class="divider">|</span>
+            <a href="https://instagram.com/ariestavandera" target="_blank">
+                <i class="fab fa-instagram"></i> @ariestavandera
+            </a>
+        </div>
+    </footer>
+
+    <!-- Modal Ekspor Excel Multi-Sesi -->
+<div id="modalExportExcel" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-file-excel" style="color: #107c41;"></i> Ekspor Laporan Excel</h3>
+            <button class="btn-close-modal" onclick="tutupModalExport()">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+            <p class="modal-subtitle">Pilih sesi / kelas yang ingin diekspor:</p>
+            
+            <div class="select-all-box">
+                <label>
+                    <input type="checkbox" id="cbPilihSemuaSesi" onchange="togglePilihSemuaSesi(this)">
+                    <strong>Pilih Semua Sesi</strong>
+                </label>
+            </div>
+            
+            <!-- Container daftar sesi (Diisi secara dinamis lewat JS) -->
+            <div id="daftarSesiExport" class="export-sesi-list">
+                <!-- Contoh item dinamis: -->
+                <!-- <label class="sesi-item"><input type="checkbox" value="id_123" class="cb-sesi-export"> Kelas 4A - Lari 60M</label> -->
+            </div>
+
+            <div class="export-options">
+                <label>
+                    <input type="checkbox" id="cbIncludeChart" checked>
+                    Sertakan Grafik Statistik di Excel
+                </label>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="tutupModalExport()">Batal</button>
+            <button class="btn-primary" onclick="prosesDownloadExcel()">
+                <i class="fa-solid fa-download"></i> Download Excel (.xlsx)
+            </button>
+        </div>
+    </div>
+</div>
+
+    <!-- Script External & Initialization -->
+    <script src="script.js"></script>
+    <script>
+      function toggleMobileSidebar() {
+        document.getElementById('sidebar').classList.toggle('openSidebar');
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const ctx = document.getElementById('performanceChart')?.getContext('2d');
+        if (ctx) {
+          new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
+              datasets: [{
+                label: 'Rata-Rata Skor Fisik',
+                data: [65, 72, 78, 85],
+                borderColor: '#ff6b6b',
+                backgroundColor: 'rgba(255, 107, 107, 0.15)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#ff6b6b'
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                x: {
+                  grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                  ticks: { color: '#94a3b8' }
+                },
+                y: {
+                  grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                  ticks: { color: '#94a3b8' }
+                }
+              }
+            }
+          });
+        }
+      });
+    </script>
+
+    <!-- Bagian akhir isi HTML Anda -->
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('Service Worker registered:', reg.scope))
+          .catch(err => console.error('Service Worker registration failed:', err));
+      });
+    }
+  </script>
+</body>
+</html>
