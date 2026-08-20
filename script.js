@@ -95,7 +95,7 @@ function renderSubmenuHitung() {
 }
 
 // ==========================================
-// 3. PARSER & TAMBAH RUMUS SMART
+// 3. PARSER & TAMBAH RUMUS SMART (FIXED)
 // ==========================================
 
 function parseRumusSmart() {
@@ -116,7 +116,8 @@ function parseRumusSmart() {
     if (container) container.style.display = 'flex';
     if (placeholder) placeholder.style.display = 'none';
 
-    const tokens = rawInput.match(/([a-zA-Z_]+|[0-9]+(?:\.[0-9]+)?|[\+\-\*\/\(\)])/g) || [];
+    // FIX REGEX: Karakter ^ di-escape (\^) agar dibaca sebagai simbol operator
+    const tokens = rawInput.match(/sqrt|[a-zA-Z_]+|[0-9]+(?:\.[0-9]+)?|[\+\-\*\/\(\)\^\√]/g) || [];
 
     chipsWrapper.innerHTML = '';
     currentParsedVariables = [];
@@ -127,17 +128,28 @@ function parseRumusSmart() {
         let chipClass = '';
         let label = token;
 
-        if (/^[a-zA-Z_]+$/.test(token)) {
+        // 1. CEK FUNGSI AKAR
+        if (token === 'sqrt' || token === '√') {
+            chipClass = 'chip-fn';
+            label = '√';
+            verbalWords.push('akar kuadrat dari');
+        } 
+        // 2. CEK VARIABEL
+        else if (/^[a-zA-Z_]+$/.test(token)) {
             chipClass = 'chip-var';
             label = `[${token}]`;
             if (!currentParsedVariables.includes(token)) {
                 currentParsedVariables.push(token);
             }
             verbalWords.push(`<b>${token}</b>`);
-        } else if (/^[0-9]+(?:\.[0-9]+)?$/.test(token)) {
+        } 
+        // 3. CEK ANGKA
+        else if (/^[0-9]+(?:\.[0-9]+)?$/.test(token)) {
             chipClass = 'chip-num';
             verbalWords.push(token);
-        } else if (/^[\(\)]$/.test(token)) {
+        } 
+        // 4. CEK TANDA KURUNG
+        else if (/^[\(\)]$/.test(token)) {
             chipClass = 'chip-paren';
             if (token === '(') {
                 parenBalance++;
@@ -146,10 +158,22 @@ function parseRumusSmart() {
                 parenBalance--;
                 verbalWords.push(')');
             }
-        } else {
+        } 
+        // 5. CEK OPERATOR (Termasuk Pangkat ^)
+        else {
             chipClass = 'chip-op';
-            const opMap = { '+': 'ditambah', '-': 'dikurangi', '*': 'dikali', '/': 'dibagi' };
-            const opSymbolMap = { '*': '×', '/': '÷' };
+            const opMap = { 
+                '+': 'ditambah', 
+                '-': 'dikurangi', 
+                '*': 'dikali', 
+                '/': 'dibagi',
+                '^': 'dipangkatkan'
+            };
+            const opSymbolMap = { 
+                '*': '×', 
+                '/': '÷',
+                '^': '^' 
+            };
             label = opSymbolMap[token] || token;
             verbalWords.push(opMap[token] || token);
         }
@@ -359,7 +383,8 @@ function parseRumusSmartEdit() {
         return;
     }
 
-    const tokens = rawInput.match(/([a-zA-Z_]+|[0-9]+(?:\.[0-9]+)?|[\+\-\*\/\(\)])/g) || [];
+    // UPDATED REGEX EDIT: Mendukung sqrt, ^, dan √
+    const tokens = rawInput.match(/sqrt|[a-zA-Z_]+|[0-9]+(?:\.[0-9]+)?|[\+\-\*\/\(\)\^\√]/g) || [];
 
     chipsWrapper.innerHTML = '';
     editParsedVariables = [];
@@ -370,7 +395,11 @@ function parseRumusSmartEdit() {
         let chipClass = '';
         let label = token;
 
-        if (/^[a-zA-Z_]+$/.test(token)) {
+        if (token === 'sqrt' || token === '√') {
+            chipClass = 'chip-fn';
+            label = '√';
+            verbalWords.push('akar kuadrat dari');
+        } else if (/^[a-zA-Z_]+$/.test(token)) {
             chipClass = 'chip-var';
             label = `[${token}]`;
             if (!editParsedVariables.includes(token)) {
@@ -391,8 +420,18 @@ function parseRumusSmartEdit() {
             }
         } else {
             chipClass = 'chip-op';
-            const opMap = { '+': 'ditambah', '-': 'dikurangi', '*': 'dikali', '/': 'dibagi' };
-            const opSymbolMap = { '*': '×', '/': '÷' };
+            const opMap = { 
+                '+': 'ditambah', 
+                '-': 'dikurangi', 
+                '*': 'dikali', 
+                '/': 'dibagi',
+                '^': 'dipangkatkan'
+            };
+            const opSymbolMap = { 
+                '*': '×', 
+                '/': '÷',
+                '^': '^' 
+            };
             label = opSymbolMap[token] || token;
             verbalWords.push(opMap[token] || token);
         }
@@ -616,7 +655,15 @@ function hitungNilai(rumusId) {
         if (values.some(v => isNaN(v))) continue;
 
         try {
-            let fn = new Function(...vars, 'return ' + rumusObj.formula);
+            // =========================================================
+            // PERBAIKAN UTAMA: Transformasi Operator sebelum di-eval
+            // =========================================================
+            let cleanedFormula = rumusObj.formula
+                .replace(/\^/g, '**')            // Ubah ^ menjadi ** (pangkat JS)
+                .replace(/sqrt\(/g, 'Math.sqrt(') // Ubah sqrt( menjadi Math.sqrt(
+                .replace(/√\(/g, 'Math.sqrt(');   // Ubah √( menjadi Math.sqrt(
+
+            let fn = new Function(...vars, 'return ' + cleanedFormula);
             let hasil = fn(...values);
             let result = Number(hasil.toFixed(2));
 
@@ -2681,72 +2728,3 @@ async function prosesDownloadExcel() {
     }
 }
 
-// ==========================================
-// FITUR HEADER: SIMPLE & RELIABLE VERSION
-// ==========================================
-
-// 1. FUNGSI MODE LAPANGAN (KONTRAST TINGGI)
-function toggleOutdoorMode() {
-    document.body.classList.toggle('outdoor-mode');
-    
-    // Simpan status di browser
-    const isOutdoor = document.body.classList.contains('outdoor-mode');
-    localStorage.setItem('outdoorMode', isOutdoor);
-    
-    // Feedback visual sederhana di tombol
-    const btn = document.getElementById('btnOutdoor');
-    if (btn) {
-        btn.style.background = isOutdoor ? '#facc15' : '';
-        btn.style.color = isOutdoor ? '#000000' : '';
-    }
-}
-
-// Cek status tersimpan saat aplikasi dimuat
-document.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('outdoorMode') === 'true') {
-        document.body.classList.add('outdoor-mode');
-        const btn = document.getElementById('btnOutdoor');
-        if (btn) {
-            btn.style.background = '#facc15';
-            btn.style.color = '#000000';
-        }
-    }
-});
-
-
-// 2. FUNGSI PENCARIAN SISWA / TES (GLOBAL SEARCH)
-function cariGlobal(keyword) {
-    const q = keyword.toLowerCase().trim();
-    
-    // Cari semua baris tabel atlet/siswa yang sedang tampil
-    const barisTabel = document.querySelectorAll('#tabelInputAtlet tbody tr, .tabel-atlet tbody tr');
-    
-    barisTabel.forEach(row => {
-        const teksBaris = row.textContent.toLowerCase();
-        // Sembunyikan baris jika tidak cocok dengan kata kunci
-        if (teksBaris.includes(q)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-}
-
-
-// 3. FUNGSI UPDATE SESI / KELAS
-function setNamaSesi(namaKelas) {
-    const badgeText = document.getElementById('activeBadgeText');
-    if (badgeText) {
-        badgeText.textContent = namaKelas.trim() !== '' ? namaKelas : 'Umum / Belum Ada';
-    }
-}
-
-
-// 4. SHORTCUT KEYBOARD (Ctrl + K) UNTUK PENCARIAN
-document.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        const inputCari = document.getElementById('globalQuickSearchInput');
-        if (inputCari) inputCari.focus();
-    }
-});
