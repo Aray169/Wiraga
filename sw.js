@@ -1,9 +1,12 @@
-const CACHE_NAME = 'wiraga-v1.0';
+const CACHE_NAME = 'wiraga-v1.2';
 const assetsToCache = [
   './',
   './index.html',
+  './login.html',
   './style.css',
   './script.js',
+  './firebase-config.js',
+  './auth.js',
   './manifest.json',
   './logo_baru.png'
 ];
@@ -41,7 +44,12 @@ self.addEventListener('fetch', e => {
 
       // 2. Jika tidak ada, ambil dari jaringan lalu simpan ke cache
       return fetch(e.request).then(networkResponse => {
-        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+        if (
+          networkResponse &&
+          networkResponse.status === 200 &&
+          networkResponse.type === 'basic' &&
+          e.request.url.startsWith('http')
+        ) {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(e.request, responseToCache));
         }
