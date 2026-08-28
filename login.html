@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Masuk - Wiraga</title>
+<link rel="icon" href="./logo_baru.png">
+<link rel="stylesheet" href="style.css">
+<style>
+    body.login-body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: var(--bg-main);
+        padding: 20px;
+    }
+
+    .login-wrapper {
+        width: 100%;
+        max-width: 380px;
+    }
+
+    .login-logo {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 24px;
+    }
+
+    .login-logo img {
+        height: 48px;
+    }
+
+    .login-card {
+        background: var(--bg-card);
+        border-radius: 16px;
+        padding: 28px 24px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .login-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 4px;
+        text-align: center;
+    }
+
+    .login-subtitle {
+        font-size: 13px;
+        color: var(--text-muted);
+        text-align: center;
+        margin-bottom: 22px;
+    }
+
+    .login-field {
+        margin-bottom: 14px;
+    }
+
+    .login-field label {
+        display: block;
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+    }
+
+    .login-field input {
+        width: 100%;
+        padding: 11px 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: var(--bg-input);
+        color: var(--text-main);
+        font-size: 14px;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
+
+    .login-field input:focus {
+        border-color: var(--primary);
+    }
+
+    .login-btn-primary {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: none;
+        background: var(--primary);
+        color: #0b0f19;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-top: 4px;
+    }
+
+    .login-btn-primary:hover {
+        background: var(--primary-hover);
+        color: var(--text-main);
+    }
+
+    .login-btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .login-divider {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 18px 0;
+        color: var(--text-muted);
+        font-size: 12px;
+    }
+
+    .login-divider::before,
+    .login-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: rgba(255,255,255,0.08);
+    }
+
+    .login-btn-google {
+        width: 100%;
+        padding: 11px;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: var(--bg-input);
+        color: var(--text-main);
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: background 0.2s;
+    }
+
+    .login-btn-google:hover {
+        background: var(--bg-card-hover);
+    }
+
+    .login-btn-google svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .login-switch {
+        text-align: center;
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-top: 18px;
+    }
+
+    .login-switch a {
+        color: var(--primary);
+        cursor: pointer;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .login-error {
+        background: rgba(255, 71, 87, 0.12);
+        border: 1px solid rgba(255, 71, 87, 0.3);
+        color: var(--accent-red);
+        font-size: 12.5px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        margin-bottom: 14px;
+        display: none;
+    }
+
+    .login-loading {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 13px;
+        margin-top: 12px;
+        display: none;
+    }
+</style>
+</head>
+<body class="login-body">
+
+    <div class="login-wrapper">
+        <div class="login-logo">
+            <img src="./logo_baru.png" alt="Wiraga">
+        </div>
+
+        <div class="login-card">
+            <div id="loginError" class="login-error"></div>
+
+            <!-- ====== FORM MASUK ====== -->
+            <div id="formMasuk">
+                <div class="login-title">Masuk ke Wiraga</div>
+                <div class="login-subtitle">Platform Asesmen &amp; Analisis Kebugaran Jasmani</div>
+
+                <div class="login-field">
+                    <label>Email</label>
+                    <input type="email" id="masukEmail" placeholder="nama@email.com" autocomplete="email">
+                </div>
+                <div class="login-field">
+                    <label>Kata Sandi</label>
+                    <input type="password" id="masukPassword" placeholder="Masukkan kata sandi" autocomplete="current-password">
+                </div>
+
+                <button class="login-btn-primary" id="btnMasuk" onclick="handleLoginEmail()">Masuk</button>
+
+                <div class="login-divider">ATAU</div>
+
+                <button class="login-btn-google" onclick="handleLoginGoogle()">
+                    <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34 5.1 29.3 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.6 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34 5.1 29.3 3 24 3 16.3 3 9.6 7.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 45c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 36.6 26.7 37.5 24 37.5c-5.3 0-9.7-3.4-11.3-8.1l-6.5 5C9.5 40.6 16.2 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.2 5.2C40.9 35.9 44 30.5 44 24c0-1.4-.2-2.4-.4-3.5z"/></svg>
+                    Masuk dengan Google
+                </button>
+
+                <div class="login-switch">
+                    Belum punya akun? <a onclick="toggleForm('daftar')">Daftar di sini</a>
+                </div>
+            </div>
+
+            <!-- ====== FORM DAFTAR ====== -->
+            <div id="formDaftar" style="display:none;">
+                <div class="login-title">Buat Akun Guru</div>
+                <div class="login-subtitle">Data rumus &amp; siswa milikmu, tersimpan aman &amp; privat</div>
+
+                <div class="login-field">
+                    <label>Nama Lengkap</label>
+                    <input type="text" id="daftarNama" placeholder="Nama kamu" autocomplete="name">
+                </div>
+                <div class="login-field">
+                    <label>Email</label>
+                    <input type="email" id="daftarEmail" placeholder="nama@email.com" autocomplete="email">
+                </div>
+                <div class="login-field">
+                    <label>Kata Sandi</label>
+                    <input type="password" id="daftarPassword" placeholder="Minimal 6 karakter" autocomplete="new-password">
+                </div>
+
+                <button class="login-btn-primary" id="btnDaftar" onclick="handleRegisterEmail()">Daftar Akun</button>
+
+                <div class="login-divider">ATAU</div>
+
+                <button class="login-btn-google" onclick="handleLoginGoogle()">
+                    <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34 5.1 29.3 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.6 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34 5.1 29.3 3 24 3 16.3 3 9.6 7.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 45c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 36.6 26.7 37.5 24 37.5c-5.3 0-9.7-3.4-11.3-8.1l-6.5 5C9.5 40.6 16.2 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.2 5.2C40.9 35.9 44 30.5 44 24c0-1.4-.2-2.4-.4-3.5z"/></svg>
+                    Daftar dengan Google
+                </button>
+
+                <div class="login-switch">
+                    Sudah punya akun? <a onclick="toggleForm('masuk')">Masuk di sini</a>
+                </div>
+            </div>
+
+            <div class="login-loading" id="loginLoading">Memproses...</div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+</body>
+</html>
