@@ -18,6 +18,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
 
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -31,6 +32,13 @@
     <!-- Library untuk Export Excel + Gambar Grafik -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        /* Sembunyikan seluruh isi halaman sampai auth.js memastikan
+           guru sudah login (mencegah "kedipan" konten sebelum redirect) */
+        body:not(.auth-ready) > *:not(script) {
+            visibility: hidden;
+        }
+    </style>
 </head>
 <body>
 
@@ -81,6 +89,19 @@
                 <span>Tentang</span>
             </div>
         </a>
+
+        <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08);">
+            <div style="padding: 0 4px 10px; font-size: 12px; color: var(--text-muted);">
+                Masuk sebagai<br>
+                <strong id="namaUserAktif" style="color: var(--text-main);">-</strong>
+            </div>
+            <a onclick="handleLogout()">
+                <div class="nav-left">
+                    <i class="fas fa-sign-out-alt nav-icon"></i>
+                    <span>Keluar</span>
+                </div>
+            </a>
+        </div>
     </div>
 
     <!-- 1. PAGE: BERANDA -->
