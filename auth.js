@@ -177,8 +177,15 @@ auth.onAuthStateChanged(user => {
         if (namaEl) {
             namaEl.textContent = user.displayName || user.email;
         }
-        // Sembunyikan layar loading, tampilkan aplikasi
-        const overlay = document.getElementById('authLoadingOverlay');
-        if (overlay) overlay.remove();
+
+        // Cek & pindahkan data lama (localStorage) ke Firestore, sekali saja
+        const teksEl = document.getElementById('authLoadingText');
+        if (teksEl) teksEl.textContent = 'Menyiapkan data kamu...';
+
+        migrasiDataLamaJikaPerlu(user.uid).finally(() => {
+            // Sembunyikan layar loading, tampilkan aplikasi
+            const overlay = document.getElementById('authLoadingOverlay');
+            if (overlay) overlay.remove();
+        });
     }
 });
