@@ -178,14 +178,23 @@ auth.onAuthStateChanged(user => {
             namaEl.textContent = user.displayName || user.email;
         }
 
+        // Simpan UID guru aktif secara global, dipakai file sinkronisasi lain
+        window.uidAktif = user.uid;
+
         // Cek & pindahkan data lama (localStorage) ke Firestore, sekali saja
         const teksEl = document.getElementById('authLoadingText');
         if (teksEl) teksEl.textContent = 'Menyiapkan data kamu...';
 
-        migrasiDataLamaJikaPerlu(user.uid).finally(() => {
-            // Sembunyikan layar loading, tampilkan aplikasi
-            const overlay = document.getElementById('authLoadingOverlay');
-            if (overlay) overlay.remove();
-        });
+        migrasiDataLamaJikaPerlu(user.uid)
+            .then(() => {
+                if (typeof muatRumusDariFirestore === 'function') {
+                    return muatRumusDariFirestore(user.uid);
+                }
+            })
+            .finally(() => {
+                // Sembunyikan layar loading, tampilkan aplikasi
+                const overlay = document.getElementById('authLoadingOverlay');
+                if (overlay) overlay.remove();
+            });
     }
 });
