@@ -187,9 +187,14 @@ auth.onAuthStateChanged(user => {
 
         migrasiDataLamaJikaPerlu(user.uid)
             .then(() => {
+                const tugas = [];
                 if (typeof muatRumusDariFirestore === 'function') {
-                    return muatRumusDariFirestore(user.uid);
+                    tugas.push(muatRumusDariFirestore(user.uid));
                 }
+                if (typeof muatAgendaDanCatatanDariFirestore === 'function') {
+                    tugas.push(muatAgendaDanCatatanDariFirestore(user.uid));
+                }
+                return Promise.all(tugas);
             })
             .finally(() => {
                 // Sembunyikan layar loading, tampilkan aplikasi
