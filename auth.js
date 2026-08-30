@@ -194,6 +194,9 @@ auth.onAuthStateChanged(user => {
                 if (typeof muatAgendaDanCatatanDariFirestore === 'function') {
                     tugas.push(muatAgendaDanCatatanDariFirestore(user.uid));
                 }
+                if (typeof muatRiwayatDariFirestore === 'function') {
+                    tugas.push(muatRiwayatDariFirestore(user.uid));
+                }
                 return Promise.all(tugas);
             })
             .finally(() => {
