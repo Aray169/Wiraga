@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function simpanKeLocalStorage() {
     localStorage.setItem('wiraga_rumus', JSON.stringify(daftarRumus));
+    if (typeof simpanRumusKeFirestore === 'function') simpanRumusKeFirestore();
     renderSubmenuHitung();
     updateBerandaStats();
 }
@@ -2727,4 +2728,3 @@ async function prosesDownloadExcel() {
         tutupModalExport();
     }
 }
-
