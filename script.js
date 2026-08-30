@@ -875,6 +875,7 @@ function simpanRiwayat() {
     if (typeof riwayatDB === 'undefined') window.riwayatDB = [];
     riwayatDB.push(sesiBaru);
     localStorage.setItem('riwayatDB', JSON.stringify(riwayatDB));
+    if (typeof simpanRiwayatKeFirestore === 'function') simpanRiwayatKeFirestore();
 
     tampilRiwayat();
     if (typeof updateBerandaStats === 'function') updateBerandaStats();
@@ -1955,6 +1956,7 @@ function hapusSesiRiwayat(idSesi) {
     if (confirm(`Hapus sesi tes "${riwayatDB[idx].namaTes}" (${riwayatDB[idx].tanggal})?`)) {
         riwayatDB.splice(idx, 1);
         localStorage.setItem('riwayatDB', JSON.stringify(riwayatDB));
+        if (typeof simpanRiwayatKeFirestore === 'function') simpanRiwayatKeFirestore();
         tampilRiwayat();
         if (typeof updateBerandaStats === 'function') updateBerandaStats();
         if (typeof renderPerformanceChart === 'function') renderPerformanceChart();
@@ -1965,6 +1967,7 @@ function hapusSemuaRiwayat() {
     if (confirm('⚠️ APAKAH ANDA YAKIN?\nSeluruh riwayat tes fisik akan dihapus permanen!')) {
         if (typeof riwayatDB !== 'undefined') window.riwayatDB = [];
         localStorage.removeItem('riwayatDB');
+        if (typeof simpanRiwayatKeFirestore === 'function') simpanRiwayatKeFirestore();
         tampilRiwayat();
         if (typeof updateBerandaStats === 'function') updateBerandaStats();
         if (typeof renderPerformanceChart === 'function') renderPerformanceChart();
@@ -2075,6 +2078,7 @@ function simpanPerubahanSiswa() {
 
     if (typeof riwayatDB !== 'undefined') window.riwayatDB = sourceDB;
     localStorage.setItem('riwayatDB', JSON.stringify(sourceDB));
+    if (typeof simpanRiwayatKeFirestore === 'function') simpanRiwayatKeFirestore();
 
     tutupModalEditSiswa();
     tampilRiwayat();
@@ -2254,6 +2258,7 @@ function simpanPerubahanSesi() {
     // Simpan Ke LocalStorage
     if (typeof riwayatDB !== 'undefined') window.riwayatDB = sourceDB;
     localStorage.setItem('riwayatDB', JSON.stringify(sourceDB));
+    if (typeof simpanRiwayatKeFirestore === 'function') simpanRiwayatKeFirestore();
 
     tutupModalEditSesi();
     tampilRiwayat();
