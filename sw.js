@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wiraga-v1.4';
+const CACHE_NAME = 'wiraga-v1.5';
 const assetsToCache = [
   './',
   './index.html',
@@ -8,6 +8,7 @@ const assetsToCache = [
   './firebase-config.js',
   './auth.js',
   './migrate.js',
+  './firestore-sync.js',
   './manifest.json',
   './logo_baru.png'
 ];
