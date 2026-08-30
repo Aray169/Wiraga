@@ -90,3 +90,36 @@ async function simpanCatatanKeFirestore(teks) {
         console.error('⚠️ Gagal menyimpan catatan ke Firestore (tersimpan lokal saja untuk sementara):', error);
     }
 }
+
+// =======================================================
+// TAHAP 3 MIGRASI: RIWAYAT TES (bagian terakhir)
+// =======================================================
+
+async function muatRiwayatDariFirestore(uid) {
+    try {
+        const docRef = db.collection('users').doc(uid);
+        const docSnap = await docRef.get();
+
+        if (docSnap.exists && Array.isArray(docSnap.data().riwayat)) {
+            riwayatDB = docSnap.data().riwayat;
+            localStorage.setItem('riwayatDB', JSON.stringify(riwayatDB));
+        }
+
+        if (typeof tampilRiwayat === 'function') tampilRiwayat();
+        if (typeof updateBerandaStats === 'function') updateBerandaStats();
+        if (typeof renderPerformanceChart === 'function') renderPerformanceChart();
+    } catch (error) {
+        console.error('⚠️ Gagal memuat riwayat dari Firestore, memakai data lokal sementara:', error);
+    }
+}
+
+async function simpanRiwayatKeFirestore() {
+    if (!window.uidAktif) return;
+    try {
+        await db.collection('users').doc(window.uidAktif).set({
+            riwayat: riwayatDB
+        }, { merge: true });
+    } catch (error) {
+        console.error('⚠️ Gagal menyimpan riwayat ke Firestore (tersimpan lokal saja untuk sementara):', error);
+    }
+}
