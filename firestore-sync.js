@@ -38,3 +38,55 @@ async function simpanRumusKeFirestore() {
         console.error('⚠️ Gagal menyimpan rumus ke Firestore (tersimpan lokal saja untuk sementara):', error);
     }
 }
+
+// =======================================================
+// TAHAP 2 MIGRASI: AGENDA & CATATAN PELATIH
+// =======================================================
+
+async function muatAgendaDanCatatanDariFirestore(uid) {
+    try {
+        const docRef = db.collection('users').doc(uid);
+        const docSnap = await docRef.get();
+
+        if (docSnap.exists) {
+            const data = docSnap.data();
+
+            if (Array.isArray(data.agenda)) {
+                agendaDB = data.agenda;
+                localStorage.setItem('agendaDB', JSON.stringify(agendaDB));
+            }
+
+            if (typeof data.catatan === 'string') {
+                localStorage.setItem('coachNotes', data.catatan);
+                const el = document.getElementById('coachNotes');
+                if (el) el.value = data.catatan;
+            }
+        }
+
+        if (typeof tampilAgendaList === 'function') tampilAgendaList();
+    } catch (error) {
+        console.error('⚠️ Gagal memuat agenda/catatan dari Firestore, memakai data lokal sementara:', error);
+    }
+}
+
+async function simpanAgendaKeFirestore() {
+    if (!window.uidAktif) return;
+    try {
+        await db.collection('users').doc(window.uidAktif).set({
+            agenda: agendaDB
+        }, { merge: true });
+    } catch (error) {
+        console.error('⚠️ Gagal menyimpan agenda ke Firestore (tersimpan lokal saja untuk sementara):', error);
+    }
+}
+
+async function simpanCatatanKeFirestore(teks) {
+    if (!window.uidAktif) return;
+    try {
+        await db.collection('users').doc(window.uidAktif).set({
+            catatan: teks
+        }, { merge: true });
+    } catch (error) {
+        console.error('⚠️ Gagal menyimpan catatan ke Firestore (tersimpan lokal saja untuk sementara):', error);
+    }
+}
