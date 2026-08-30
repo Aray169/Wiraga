@@ -33,14 +33,55 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
-        /* Sembunyikan seluruh isi halaman sampai auth.js memastikan
-           guru sudah login (mencegah "kedipan" konten sebelum redirect) */
-        body:not(.auth-ready) > *:not(script) {
-            visibility: hidden;
+        #authLoadingOverlay {
+            position: fixed;
+            inset: 0;
+            background: #0f0c29;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            color: #cbd5e1;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        #authLoadingOverlay .spinner {
+            width: 34px;
+            height: 34px;
+            border: 3px solid rgba(255,255,255,0.15);
+            border-top-color: #ff6b6b;
+            border-radius: 50%;
+            animation: authSpin 0.8s linear infinite;
+        }
+        @keyframes authSpin {
+            to { transform: rotate(360deg); }
+        }
+        #authLoadingOverlay .auth-retry-btn {
+            display: none;
+            margin-top: 6px;
+            background: #ff6b6b;
+            color: #0f0c29;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
+    <!-- Layar loading saat status login sedang dicek.
+         Dihapus otomatis oleh auth.js begitu proses selesai.
+         Kalau lebih dari 6 detik macet, akan muncul pesan + tombol coba lagi
+         (mencegah halaman "blank tanpa penjelasan"). -->
+    <div id="authLoadingOverlay">
+        <div class="spinner" id="authSpinner"></div>
+        <div id="authLoadingText">Memeriksa status login...</div>
+        <button class="auth-retry-btn" id="authRetryBtn" onclick="window.location.reload()">Muat Ulang Halaman</button>
+    </div>
 
     <!-- Header Navigation -->
     <div class="appHeader">
