@@ -2291,6 +2291,7 @@ function simpanJadwalBaru() {
 
     agendaDB.push({ nama, kelas, tanggal, jumlah });
     localStorage.setItem('agendaDB', JSON.stringify(agendaDB));
+    if (typeof simpanAgendaKeFirestore === 'function') simpanAgendaKeFirestore();
 
     document.getElementById('inputNamaTes').value = '';
     document.getElementById('inputKelasTes').value = '';
@@ -2335,6 +2336,7 @@ function tampilAgendaList() {
 function hapusAgenda(idx) {
     agendaDB.splice(idx, 1);
     localStorage.setItem('agendaDB', JSON.stringify(agendaDB));
+    if (typeof simpanAgendaKeFirestore === 'function') simpanAgendaKeFirestore();
     tampilAgendaList();
 }
 
@@ -2342,6 +2344,7 @@ function simpanCatatan() {
     const el = document.getElementById('coachNotes');
     if (el) {
         localStorage.setItem('coachNotes', el.value);
+        if (typeof simpanCatatanKeFirestore === 'function') simpanCatatanKeFirestore(el.value);
         alert('✅ Catatan berhasil disimpan!');
     }
 }
