@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wiraga-v1.2';
+const CACHE_NAME = 'wiraga-v1.3';
 const assetsToCache = [
   './',
   './index.html',
