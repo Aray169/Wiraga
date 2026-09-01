@@ -123,6 +123,9 @@ function handleLoginGoogle() {
 
 // ---------- Logout ----------
 function handleLogout() {
+    if (typeof bersihkanCacheLokalUntukAkunBaru === 'function') {
+        bersihkanCacheLokalUntukAkunBaru();
+    }
     auth.signOut().then(() => {
         window.location.href = 'login.html';
     });
@@ -180,6 +183,14 @@ auth.onAuthStateChanged(user => {
 
         // Simpan UID guru aktif secara global, dipakai file sinkronisasi lain
         window.uidAktif = user.uid;
+
+        // Kalau device ini sebelumnya dipakai akun LAIN, bersihkan dulu
+        // cache lokal supaya tidak tercampur dengan akun yang sekarang login
+        const uidSebelumnya = localStorage.getItem('wiraga_last_uid');
+        if (uidSebelumnya && uidSebelumnya !== user.uid && typeof bersihkanCacheLokalUntukAkunBaru === 'function') {
+            bersihkanCacheLokalUntukAkunBaru();
+        }
+        localStorage.setItem('wiraga_last_uid', user.uid);
 
         // Cek & pindahkan data lama (localStorage) ke Firestore, sekali saja
         const teksEl = document.getElementById('authLoadingText');
