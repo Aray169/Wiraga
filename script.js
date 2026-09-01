@@ -2067,20 +2067,22 @@ function simpanPerubahanSiswa() {
     const siswa = sesi.dataSiswa[activeEditSiswaIndex];
 
     const namaBaru = document.getElementById('editNamaSiswa').value.trim();
-    const nilaiBaru = Number(document.getElementById('editNilaiSiswa').value);
-    const benchmarkBaru = Number(document.getElementById('editBenchmarkSiswa').value);
+    const nilaiRaw = document.getElementById('editNilaiSiswa').value.trim();
+    const benchmarkRaw = document.getElementById('editBenchmarkSiswa').value.trim();
+    const nilaiBaru = Number(nilaiRaw);
+    const benchmarkBaru = Number(benchmarkRaw);
 
     if (!namaBaru) {
         alert('Nama siswa tidak boleh kosong!');
         return;
     }
 
-    if (isNaN(nilaiBaru)) {
+    if (nilaiRaw === '' || isNaN(nilaiBaru)) {
         alert('⚠️ Hasil / Nilai Capaian harus diisi dengan angka yang valid!');
         return;
     }
 
-    if (isNaN(benchmarkBaru) || benchmarkBaru < 0) {
+    if (benchmarkRaw === '' || isNaN(benchmarkBaru) || benchmarkBaru < 0) {
         alert('⚠️ Benchmark Target harus diisi dengan angka positif (atau 0 jika tidak ada target)!');
         return;
     }
