@@ -559,13 +559,32 @@ function prosesImportExcel(event) {
             const table = document.getElementById('table_' + rumusObj.id);
             if (!table) return;
 
+            let varsCount = rumusObj.variables && rumusObj.variables.length > 0 ? rumusObj.variables.length : 1;
+            const namaKolomHarapan = ['Nama', ...rumusObj.variables].join(', ');
+
+            // =========================================================
+            // VALIDASI: Cek jumlah kolom sesuai format yang diharapkan
+            // =========================================================
+            const headerRow = jsonRows[0] || [];
+            if (headerRow.length < varsCount + 1) {
+                const lanjut = confirm(
+                    `⚠️ Jumlah kolom di file Excel (${headerRow.length}) tidak sesuai dengan yang diharapkan (${varsCount + 1}).\n\n` +
+                    `Urutan kolom seharusnya: ${namaKolomHarapan}\n\n` +
+                    `Kolom yang kosong akan diisi 0. Tetap lanjutkan impor?`
+                );
+                if (!lanjut) {
+                    event.target.value = '';
+                    return;
+                }
+            }
+
             while (table.rows.length > 1) {
                 table.deleteRow(1);
             }
 
-            let varsCount = rumusObj.variables && rumusObj.variables.length > 0 ? rumusObj.variables.length : 1;
-
             let importedCount = 0;
+            const barisDiabaikan = [];
+
             for (let i = 1; i < jsonRows.length; i++) {
                 const rowData = jsonRows[i];
                 if (!rowData || rowData.length === 0) continue;
@@ -573,21 +592,50 @@ function prosesImportExcel(event) {
                 const nama = rowData[0] ? String(rowData[0]).trim() : '';
                 if (!nama) continue;
 
+                // =========================================================
+                // VALIDASI: Setiap nilai variabel harus angka yang valid
+                // =========================================================
+                let adaNilaiInvalid = false;
+                const nilaiPerVar = [];
+                for (let vIdx = 0; vIdx < varsCount; vIdx++) {
+                    const rawVal = rowData[vIdx + 1];
+                    if (rawVal === undefined || rawVal === null || String(rawVal).trim() === '') {
+                        adaNilaiInvalid = true;
+                        break;
+                    }
+                    const numVal = Number(rawVal);
+                    if (isNaN(numVal)) {
+                        adaNilaiInvalid = true;
+                        break;
+                    }
+                    nilaiPerVar.push(numVal);
+                }
+
+                if (adaNilaiInvalid) {
+                    barisDiabaikan.push(`Baris ${i + 1} ("${nama}") - nilai kosong/bukan angka`);
+                    continue;
+                }
+
                 tambahBaris(rumusObj.id, table);
                 const lastRow = table.rows[table.rows.length - 1];
 
                 lastRow.cells[1].querySelector('input').value = nama;
 
                 for (let vIdx = 0; vIdx < varsCount; vIdx++) {
-                    const val = rowData[vIdx + 1] !== undefined ? rowData[vIdx + 1] : 0;
                     if (lastRow.cells[2 + vIdx]) {
-                        lastRow.cells[2 + vIdx].querySelector('input').value = val;
+                        lastRow.cells[2 + vIdx].querySelector('input').value = nilaiPerVar[vIdx];
                     }
                 }
                 importedCount++;
             }
 
-            alert(`✅ Berhasil mengimpor ${importedCount} data siswa dari file Excel!`);
+            let pesanHasil = `✅ Berhasil mengimpor ${importedCount} data siswa dari file Excel!`;
+            if (barisDiabaikan.length > 0) {
+                const tampilkan = barisDiabaikan.slice(0, 10).join('\n');
+                const sisa = barisDiabaikan.length > 10 ? `\n...dan ${barisDiabaikan.length - 10} baris lainnya` : '';
+                pesanHasil += `\n\n⚠️ ${barisDiabaikan.length} baris DILEWATI karena data tidak valid:\n${tampilkan}${sisa}`;
+            }
+            alert(pesanHasil);
             event.target.value = '';
 
         } catch (error) {
