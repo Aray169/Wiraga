@@ -24,6 +24,8 @@
 
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Math.js CDN (evaluasi rumus matematika yang aman) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.2/math.min.js"></script>
 
     <!-- External CSS -->
     <link rel="stylesheet" href="style.css">
@@ -278,7 +280,12 @@
                 <div class="field-item">
                     <label for="isiRumus"><i class="fas fa-square-root-variable"></i> Formula Rumus Matematika</label>
                     <input type="text" id="isiRumus" placeholder="Contoh: ((Jarak / 15) - 133) * 0.172 + 33.33" oninput="parseRumusSmart()">
-                    <small class="field-hint"><i class="fas fa-info-circle"></i> Gunakan simbol <code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>(</code> <code>)</code> dan ketik nama variabel langsung.</small>
+                    <small class="field-hint">
+                        <i class="fas fa-info-circle"></i> Gunakan simbol <code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>(</code> <code>)</code> dan ketik nama variabel langsung.
+                        <a href="javascript:void(0)" onclick="bukaModalPanduanSimbol()" style="color: #48dbfb; font-weight: 600; margin-left: 4px;">
+                            <i class="fas fa-square-root-variable"></i> Lihat semua simbol yang didukung
+                        </a>
+                    </small>
                 </div>
 
                 <div class="field-item">
@@ -646,6 +653,9 @@
                     <input type="text" id="editRumusFormula" placeholder="Contoh: ((Jarak / 15) - 133) * 0.172 + 33.33" oninput="parseRumusSmartEdit()" style="width: 100%; padding: 10px 12px; background: #0f172a; border: 1px solid #38bdf8; border-radius: 8px; color: #fff; font-size: 13px; box-sizing: border-box;" />
                     <small class="field-hint" style="color: #94a3b8; font-size: 11px; display: block; margin-top: 4px;">
                         <i class="fas fa-info-circle"></i> Gunakan simbol <code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>(</code> <code>)</code> dan ketik nama variabel langsung.
+                        <a href="javascript:void(0)" onclick="bukaModalPanduanSimbol()" style="color: #48dbfb; font-weight: 600; margin-left: 4px;">
+                            <i class="fas fa-square-root-variable"></i> Lihat semua simbol
+                        </a>
                     </small>
                 </div>
 
@@ -785,7 +795,100 @@
         </div>
     </div>
 
-    
+    <!-- MODAL PANDUAN SIMBOL RUMUS -->
+    <div id="modalPanduanSimbol" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(4px);">
+        <div style="background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; width: 90%; max-width: 480px; max-height: 85vh; overflow-y: auto; padding: 22px; color: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+                <h3 style="margin: 0; font-size: 17px; color: #48dbfb; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-square-root-variable"></i> Panduan Simbol Rumus
+                </h3>
+                <button onclick="tutupModalPanduanSimbol()" style="background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer;">&times;</button>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <div style="font-size: 12px; font-weight: 700; color: #ff6b6b; margin-bottom: 8px; letter-spacing: 0.5px;">➕ OPERATOR DASAR</div>
+                <table style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <td style="padding: 6px 4px; font-family: monospace; color: #48dbfb; width: 60px;">+</td>
+                        <td style="padding: 6px 4px; color: #cbd5e1;">Penjumlahan</td>
+                        <td style="padding: 6px 4px; font-family: monospace; color: #94a3b8; text-align: right;">x + 10</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <td style="padding: 6px 4px; font-family: monospace; color: #48dbfb;">-</td>
+                        <td style="padding: 6px 4px; color: #cbd5e1;">Pengurangan</td>
+                        <td style="padding: 6px 4px; font-family: monospace; color: #94a3b8; text-align: right;">x - 5</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <td style="padding: 6px 4px; font-family: monospace; color: #48dbfb;">*</td>
+                        <td style="padding: 6px 4px; color: #cbd5e1;">Perkalian</td>
+                        <td style="padding: 6px 4px; font-family: monospace; color: #94a3b8; text-align: right;">x * 2</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <td style="padding: 6px 4px; font-family: monospace; color: #48dbfb;">/</td>
+                        <td style="padding: 6px 4px; color: #cbd5e1;">Pembagian</td>
+                        <td style="padding: 6px 4px; font-family: monospace; color: #94a3b8; text-align: right;">x / 15</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <td style="padding: 6px 4px; font-family: monospace; color: #48dbfb;">^</td>
+                        <td style="padding: 6px 4px; color: #cbd5e1;">Pangkat</td>
+                        <td style="padding: 6px 4px; font-family: monospace; color: #94a3b8; text-align: right;">x^2</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 4px; font-family: monospace; color: #48dbfb;">( )</td>
+                        <td style="padding: 6px 4px; color: #cbd5e1;">Urutan hitung</td>
+                        <td style="padding: 6px 4px; font-family: monospace; color: #94a3b8; text-align: right;">(x+5)*2</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <div style="font-size: 12px; font-weight: 700; color: #2ed573; margin-bottom: 8px; letter-spacing: 0.5px;">🧮 FUNGSI MATEMATIKA</div>
+                <table style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <td style="padding: 6px 4px; font-family: monospace; color: #2ed573; width: 90px;">sqrt(x)</td>
+                        <td style="padding: 6px 4px; color: #cbd5e1;">Akar kuadrat</td>
+                        <td style="padding: 6px 4px; font-family: monospace; color: #94a3b8; text-align: right;">sqrt(x)</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <td style="padding: 6px 4px; font-family: monospace; color: #2ed573;">abs(x)</td>
+                        <td style="padding: 6px 4px; color: #cbd5e1;">Nilai mutlak (selalu positif)</td>
+                        <td style="padding: 6px 4px; font-family: monospace; color: #94a3b8; text-align: right;">abs(x-100)</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <td style="padding: 6px 4px; font-family: monospace; color: #2ed573;">round(x)</td>
+                        <td style="padding: 6px 4px; color: #cbd5e1;">Pembulatan angka</td>
+                        <td style="padding: 6px 4px; font-family: monospace; color: #94a3b8; text-align: right;">round(x/3)</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <td style="padding: 6px 4px; font-family: monospace; color: #2ed573;">min(a,b)</td>
+                        <td style="padding: 6px 4px; color: #cbd5e1;">Nilai terkecil</td>
+                        <td style="padding: 6px 4px; font-family: monospace; color: #94a3b8; text-align: right;">min(x,y)</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 4px; font-family: monospace; color: #2ed573;">max(a,b)</td>
+                        <td style="padding: 6px 4px; color: #cbd5e1;">Nilai terbesar</td>
+                        <td style="padding: 6px 4px; font-family: monospace; color: #94a3b8; text-align: right;">max(x,y)</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <div style="font-size: 12px; font-weight: 700; color: #feca57; margin-bottom: 8px; letter-spacing: 0.5px;">🔢 KONSTANTA</div>
+                <table style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
+                    <tr>
+                        <td style="padding: 6px 4px; font-family: monospace; color: #feca57; width: 90px;">pi</td>
+                        <td style="padding: 6px 4px; color: #cbd5e1;">Nilai π (3.14159...)</td>
+                        <td style="padding: 6px 4px; font-family: monospace; color: #94a3b8; text-align: right;">2*pi*x</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div style="background: rgba(72, 219, 251, 0.08); border: 1px solid rgba(72, 219, 251, 0.2); border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #cbd5e1;">
+                <strong style="color: #48dbfb;">💡 Contoh Rumus Lengkap:</strong><br>
+                <span style="font-family: monospace;">(x - 133) * 0.172 + 33.3</span>
+            </div>
+        </div>
+    </div>
 
     <!-- FOOTER NAVBAR -->
     <footer>
