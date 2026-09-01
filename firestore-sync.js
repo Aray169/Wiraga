@@ -8,6 +8,31 @@
 // tapi Firestore adalah sumber data utama.
 // =======================================================
 
+// =======================================================
+// PEMBERSIH DATA LOKAL SAAT GANTI AKUN
+// =======================================================
+// localStorage itu dipakai BERSAMA oleh semua akun di 1 browser
+// (bukan per-akun). Fungsi ini memastikan cache lama milik akun
+// sebelumnya tidak "nyasar" kebawa ke akun yang baru login.
+// =======================================================
+
+function bersihkanCacheLokalUntukAkunBaru() {
+    localStorage.removeItem('wiraga_rumus');
+    localStorage.removeItem('riwayatDB');
+    localStorage.removeItem('agendaDB');
+    localStorage.removeItem('coachNotes');
+    localStorage.removeItem('dataRiwayat');
+    localStorage.removeItem('riwayatSesi');
+    localStorage.removeItem('riwayat_wiraga');
+
+    // Reset variabel di memori juga (bukan cuma localStorage-nya)
+    try { daftarRumus = []; } catch (e) {}
+    try { riwayatDB = []; } catch (e) {}
+    try { agendaDB = []; } catch (e) {}
+    const notesEl = document.getElementById('coachNotes');
+    if (notesEl) notesEl.value = '';
+}
+
 async function muatRumusDariFirestore(uid) {
     try {
         const docRef = db.collection('users').doc(uid);
