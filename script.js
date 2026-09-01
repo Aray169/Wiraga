@@ -599,6 +599,31 @@ function prosesImportExcel(event) {
 }
 
 // ==========================================
+// VALIDASI: Urutan rubrik nilai harus logis
+// ==========================================
+function validasiUrutanRubrik(limitSB, limitB, limitC, isLowerBetter) {
+    const masalah = [];
+    if (isLowerBetter) {
+        // Lower is better -> SB harus PALING KECIL, C paling besar
+        if (limitSB !== null && limitB !== null && limitSB > limitB) {
+            masalah.push('Batas "Sangat Baik" (' + limitSB + ') seharusnya lebih kecil atau sama dengan "Baik" (' + limitB + ') karena tes ini "Lower is Better".');
+        }
+        if (limitB !== null && limitC !== null && limitB > limitC) {
+            masalah.push('Batas "Baik" (' + limitB + ') seharusnya lebih kecil atau sama dengan "Cukup" (' + limitC + ') karena tes ini "Lower is Better".');
+        }
+    } else {
+        // Higher is better -> SB harus PALING BESAR, C paling kecil
+        if (limitSB !== null && limitB !== null && limitSB < limitB) {
+            masalah.push('Batas "Sangat Baik" (' + limitSB + ') seharusnya lebih besar atau sama dengan "Baik" (' + limitB + ') karena tes ini "Higher is Better".');
+        }
+        if (limitB !== null && limitC !== null && limitB < limitC) {
+            masalah.push('Batas "Baik" (' + limitB + ') seharusnya lebih besar atau sama dengan "Cukup" (' + limitC + ') karena tes ini "Higher is Better".');
+        }
+    }
+    return masalah;
+}
+
+// ==========================================
 // HITUNG NILAI & BACA LOGIKA
 // ==========================================
 function hitungNilai(rumusId) {
@@ -620,6 +645,15 @@ function hitungNilai(rumusId) {
     const limitSB = valSB !== "" && valSB !== null ? Number(valSB) : null;
     const limitB  = valB  !== "" && valB  !== null ? Number(valB)  : null;
     const limitC  = valC  !== "" && valC  !== null ? Number(valC)  : null;
+
+    // =========================================================
+    // VALIDASI: Urutan rubrik harus logis sesuai orientasi tes
+    // =========================================================
+    const masalahRubrik = validasiUrutanRubrik(limitSB, limitB, limitC, isLowerBetter);
+    if (masalahRubrik.length > 0) {
+        alert('⚠️ Rubrik nilai tidak logis:\n\n' + masalahRubrik.join('\n') + '\n\nSilakan perbaiki dulu batas rubriknya sebelum menghitung.');
+        return;
+    }
 
     function getKategoriRubrik(resultVal) {
         if (limitSB === null && limitB === null && limitC === null) {
@@ -2201,6 +2235,12 @@ function simpanPerubahanSesi() {
         b:  valB  !== "" && valB  !== null && !isNaN(valB)  ? Number(valB)  : null,
         c:  valC  !== "" && valC  !== null && !isNaN(valC)  ? Number(valC)  : null
     };
+
+    const masalahRubrikEdit = validasiUrutanRubrik(newRubrikLimits.sb, newRubrikLimits.b, newRubrikLimits.c, isLowerBetter);
+    if (masalahRubrikEdit.length > 0) {
+        alert('⚠️ Rubrik nilai tidak logis:\n\n' + masalahRubrikEdit.join('\n') + '\n\nSilakan perbaiki dulu batas rubriknya sebelum menyimpan.');
+        return;
+    }
 
     // Update Header Sesi
     sesi.namaTes = newNamaTes;
