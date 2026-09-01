@@ -38,6 +38,16 @@ function simpanKeLocalStorage() {
     updateBerandaStats();
 }
 
+function bukaModalPanduanSimbol() {
+    const modal = document.getElementById('modalPanduanSimbol');
+    if (modal) modal.style.display = 'flex';
+}
+
+function tutupModalPanduanSimbol() {
+    const modal = document.getElementById('modalPanduanSimbol');
+    if (modal) modal.style.display = 'none';
+}
+
 // ==========================================
 // 2. KONTROL NAVIGASI PAGE & SIDEBAR
 // ==========================================
@@ -657,16 +667,14 @@ function hitungNilai(rumusId) {
 
         try {
             // =========================================================
-            // PERBAIKAN UTAMA: Transformasi Operator sebelum di-eval
+            // EVALUASI RUMUS AMAN MENGGUNAKAN MATH.JS
+            // (menggantikan new Function() yang berisiko keamanan)
             // =========================================================
-            let cleanedFormula = rumusObj.formula
-                .replace(/\^/g, '**')            // Ubah ^ menjadi ** (pangkat JS)
-                .replace(/sqrt\(/g, 'Math.sqrt(') // Ubah sqrt( menjadi Math.sqrt(
-                .replace(/√\(/g, 'Math.sqrt(');   // Ubah √( menjadi Math.sqrt(
+            const scope = {};
+            vars.forEach((namaVar, j) => { scope[namaVar] = values[j]; });
 
-            let fn = new Function(...vars, 'return ' + cleanedFormula);
-            let hasil = fn(...values);
-            let result = Number(hasil.toFixed(2));
+            let hasil = math.evaluate(rumusObj.formula, scope);
+            let result = Number(Number(hasil).toFixed(2));
 
             const kategoriObj = getKategoriRubrik(result);
 
