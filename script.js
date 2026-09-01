@@ -2075,6 +2075,16 @@ function simpanPerubahanSiswa() {
         return;
     }
 
+    if (isNaN(nilaiBaru)) {
+        alert('⚠️ Hasil / Nilai Capaian harus diisi dengan angka yang valid!');
+        return;
+    }
+
+    if (isNaN(benchmarkBaru) || benchmarkBaru < 0) {
+        alert('⚠️ Benchmark Target harus diisi dengan angka positif (atau 0 jika tidak ada target)!');
+        return;
+    }
+
     siswa.nama = namaBaru;
     siswa.siswa = namaBaru;
     siswa.nilai = nilaiBaru;
@@ -2338,6 +2348,14 @@ function simpanJadwalBaru() {
     if (!nama || !tanggal) {
         alert('Mohon isi nama tes dan tanggal!');
         return;
+    }
+
+    if (jumlah !== '' && jumlah !== null) {
+        const jumlahNum = Number(jumlah);
+        if (isNaN(jumlahNum) || jumlahNum < 0 || !Number.isInteger(jumlahNum)) {
+            alert('⚠️ Jumlah Siswa harus berupa angka bulat positif (contoh: 28), tidak boleh negatif atau desimal.');
+            return;
+        }
     }
 
     if (!Array.isArray(agendaDB)) agendaDB = [];
