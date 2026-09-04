@@ -1,10 +1,14 @@
-const CACHE_NAME = 'wiraga-v2.3';
+const CACHE_NAME = 'wiraga-v3.0';
 const assetsToCache = [
   './',
   './index.html',
   './login.html',
   './style.css',
-  './script.js',
+  './core-state.js',
+  './rumus.js',
+  './hitung.js',
+  './riwayat.js',
+  './agenda.js',
   './firebase-config.js',
   './auth.js',
   './migrate.js',
