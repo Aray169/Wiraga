@@ -68,7 +68,7 @@ body {
     left: 0;
     right: 0;
     height: var(--header-height);
-    background: rgba(11, 15, 25, 0.85);
+    background: var(--bg-header);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border-color);
     display: flex;
@@ -942,4 +942,3 @@ footer {
         display: none;
     }
 }
-
