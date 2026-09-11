@@ -49,6 +49,39 @@ function tutupModalPanduanSimbol() {
 }
 
 // ==========================================
+// DARK / LIGHT MODE TOGGLE
+// ==========================================
+function terapkanTema(mode) {
+    const icon = document.querySelector('#btnToggleTheme i');
+    if (mode === 'light') {
+        document.body.classList.add('light-mode');
+        if (icon) {
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        }
+    } else {
+        document.body.classList.remove('light-mode');
+        if (icon) {
+            icon.classList.remove('fa-sun');
+            icon.classList.add('fa-moon');
+        }
+    }
+}
+
+function toggleTheme() {
+    const modeSekarang = localStorage.getItem('wiraga_theme') || 'dark';
+    const modeBaru = modeSekarang === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('wiraga_theme', modeBaru);
+    terapkanTema(modeBaru);
+}
+
+// Terapkan tema tersimpan begitu halaman dimuat
+(function inisialisasiTema() {
+    const modeTersimpan = localStorage.getItem('wiraga_theme') || 'dark';
+    terapkanTema(modeTersimpan);
+})();
+
+// ==========================================
 // 2. KONTROL NAVIGASI PAGE & SIDEBAR
 // ==========================================
 
@@ -104,4 +137,3 @@ function renderSubmenuHitung() {
         container.appendChild(a);
     });
 }
-
