@@ -1,23 +1,32 @@
 {
+  "id": "/Wiraga/",
   "name": "Wiraga - Sporty Modern",
   "short_name": "Wiraga",
+  "description": "Aplikasi asesmen dan analisis kebugaran jasmani",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0f0c29",
-  "theme_color": "#1a1a2e",
+  "theme_color": "#141428",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "./logo_baru.png",
+      "src": "./icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "./logo_baru.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
