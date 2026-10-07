@@ -942,3 +942,118 @@ footer {
         display: none;
     }
 }
+
+/* ==========================================
+   HALAMAN HITUNG: TABEL INPUT ATLET
+   ========================================== */
+
+/* Sembunyikan spinner naik-turun yang menutupi angka */
+.calc-input[type="number"]::-webkit-outer-spin-button,
+.calc-input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.calc-input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* Desktop/tablet: kolom punya lebar minimum, kalau variabel banyak tabel di-scroll ke samping */
+#tabContents {
+    overflow-x: auto;
+    padding-bottom: 6px;
+}
+#tabContents .custom-table th,
+#tabContents .custom-table td {
+    white-space: nowrap;
+    min-width: 100px;                /* kolom variabel */
+}
+#tabContents .custom-table th:first-child,
+#tabContents .custom-table td:first-child {
+    min-width: 44px;                 /* No */
+    width: 44px;
+}
+#tabContents .custom-table th:nth-child(2),
+#tabContents .custom-table td:nth-child(2) {
+    min-width: 180px;                /* Nama Atlet */
+}
+#tabContents .custom-table th:last-child,
+#tabContents .custom-table td:last-child {
+    min-width: 60px;                 /* Aksi */
+    width: 60px;
+    text-align: center;
+}
+
+/* Mobile: tiap atlet jadi satu kartu */
+@media (max-width: 768px) {
+    #tabContents { overflow-x: visible; }
+
+    #tabContents .custom-table,
+    #tabContents .custom-table tbody {
+        display: block;
+        width: 100%;
+    }
+    #tabContents .custom-table tr:first-child { display: none; }   /* baris header */
+
+    #tabContents .custom-table tr {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px 10px;
+        position: relative;
+        padding: 14px 12px;
+        margin-bottom: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+    }
+
+    #tabContents .custom-table td,
+    #tabContents .custom-table td:first-child,
+    #tabContents .custom-table td:nth-child(2),
+    #tabContents .custom-table td:last-child {
+        display: block;
+        width: auto;
+        min-width: 0;
+        padding: 0;
+        border: none;
+        text-align: left;
+        white-space: normal;
+    }
+    #tabContents .custom-table td::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 4px;
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+
+    #tabContents .custom-table .calc-input {
+        width: 100%;
+        padding: 10px 12px;
+        font-size: 16px;             /* mencegah iOS zoom saat fokus */
+    }
+
+    /* judul kartu: "Atlet ke-1" */
+    #tabContents td[data-label="No"] {
+        grid-column: 1 / -1;
+        font-weight: 700;
+        color: var(--primary);
+    }
+    #tabContents td[data-label="No"]::before {
+        content: "Atlet ke-";
+        display: inline;
+        margin: 0;
+        font-size: inherit;
+        color: inherit;
+    }
+
+    #tabContents td[data-label="Nama Atlet"] { grid-column: 1 / -1; }
+
+    /* tombol hapus di pojok kanan atas kartu */
+    #tabContents td.aksi-cell {
+        position: absolute;
+        top: 6px;
+        right: 8px;
+    }
+    #tabContents td.aksi-cell::before { display: none; }
+}
