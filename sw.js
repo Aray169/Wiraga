@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wiraga-v3.2';
+const CACHE_NAME = 'wiraga-v4.0';   // naikkan setiap rilis
 const assetsToCache = [
   './',
   './index.html',
@@ -17,55 +17,46 @@ const assetsToCache = [
   './logo_baru.png'
 ];
 
-// Install Event
+// Install: simpan tiap file satu per satu, satu file gagal tidak menggagalkan semuanya
 self.addEventListener('install', e => {
   self.skipWaiting();
   e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(assetsToCache))
+    caches.open(CACHE_NAME).then(cache =>
+      Promise.allSettled(assetsToCache.map(url => cache.add(url)))
+    )
   );
 });
 
-// Activate Event (Pembersihan Cache Lama)
+// Activate: hapus cache versi lama
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys.map(key => {
-          if (key !== CACHE_NAME) return caches.delete(key);
-        })
-      );
-    })
+    caches.keys()
+      .then(keys => Promise.all(
+        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+      ))
+      .then(() => self.clients.claim())
   );
-  return self.clients.claim();
 });
 
-// Fetch Event (Cache First, Fallback to Network)
+// Fetch: network-first (selalu ambil terbaru), cache hanya cadangan saat offline
 self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(cachedResponse => {
-      // 1. Jika ada di cache, gunakan dari cache
-      if (cachedResponse) {
-        return cachedResponse;
-      }
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  if (new URL(req.url).origin !== self.location.origin) return; // Firebase/CDN dibiarkan lewat
 
-      // 2. Jika tidak ada, ambil dari jaringan lalu simpan ke cache
-      return fetch(e.request).then(networkResponse => {
-        if (
-          networkResponse &&
-          networkResponse.status === 200 &&
-          networkResponse.type === 'basic' &&
-          e.request.url.startsWith('http')
-        ) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(e.request, responseToCache));
+  e.respondWith(
+    fetch(req.url, { cache: 'no-cache' })
+      .then(res => {
+        if (res && res.status === 200) {
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then(c => c.put(req, copy));
         }
-        return networkResponse;
-      }).catch(() => {
-        // 3. Jika offline total & request adalah navigasi halaman, kembalikan index.html
-        if (e.request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
-      });
-    })
+        return res;
+      })
+      .catch(() =>
+        caches.match(req, { ignoreSearch: true }).then(hit =>
+          hit || (req.mode === 'navigate' ? caches.match('./index.html') : undefined)
+        )
+      )
   );
 });
