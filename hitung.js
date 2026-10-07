@@ -89,9 +89,12 @@ function tambahBaris(rumusId, tableEl) {
     let vars = rumusObj.variables && rumusObj.variables.length > 0 ? rumusObj.variables : ['x'];
 
     let row = table.insertRow();
-    let cells = `<td>${idx}</td><td><input type="text" placeholder="Nama Atlet" class="calc-input"/></td>`;
-    vars.forEach(() => cells += '<td><input type="number" step="any" placeholder="0" class="calc-input"/></td>');
-    cells += `<td><button onclick="hapusBaris(this)" style="background:none; border:none; color:#ef4444; cursor:pointer;">❌</button></td>`;
+    let cells = `<td data-label="No">${idx}</td>
+                 <td data-label="Nama Atlet"><input type="text" placeholder="Nama Atlet" class="calc-input"/></td>`;
+    vars.forEach(v => {
+        cells += `<td data-label="${v}"><input type="number" step="any" inputmode="decimal" placeholder="0" class="calc-input"/></td>`;
+    });
+    cells += `<td data-label="Aksi" class="aksi-cell"><button onclick="hapusBaris(this)" style="background:none; border:none; color:#ef4444; cursor:pointer;">❌</button></td>`;
     row.innerHTML = cells;
 }
 
